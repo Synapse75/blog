@@ -72,98 +72,69 @@
   </div>
 
   <script>
-const STORAGE_KEY = 'my_workspace_posts';
+    const STORAGE_KEY = 'my_workspace_posts';
 
-let posts = [];
-let currentId = null;
+    let posts = [];
+    let currentId = null;
 
-const listEl = document.getElementById('list');
-const textarea = document.getElementById('content');
-const saveBtn = document.getElementById('saveBtn');
-const newBtn = document.getElementById('newBtn');
-const deleteBtn = document.getElementById('deleteBtn');
+    const listEl = document.getElementById('list');
+    const textarea = document.getElementById('content');
+    const saveBtn = document.getElementById('saveBtn');
 
-// 初始化数据
-function loadPosts() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    posts = JSON.parse(raw);
-  } else {
-    posts = [
-      { id: 1, title: '第一条记录', content: '' },
-      { id: 2, title: '第二条记录', content: '' }
-    ];
-    savePosts();
-  }
-}
+    // 初始化数据
+    function loadPosts() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        posts = JSON.parse(raw);
+      } else {
+        posts = [
+          { id: 1, title: '第一条记录', content: '' },
+          { id: 2, title: '第二条记录', content: '' }
+        ];
+        savePosts();
+      }
+    }
 
-// 保存到 localStorage
-function savePosts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-}
+    function savePosts() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    }
 
-// 渲染左侧列表
-function renderList() {
-  listEl.innerHTML = '';
-  posts.forEach(post => {
-    const div = document.createElement('div');
-    div.className = 'item' + (post.id === currentId ? ' active' : '');
-    div.textContent = post.title;
-    div.onclick = () => selectPost(post.id);
-    listEl.appendChild(div);
-  });
-}
+    // 渲染左侧列表
+    function renderList() {
+      listEl.innerHTML = '';
+      posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'item' + (post.id === currentId ? ' active' : '');
+        div.textContent = post.title;
+        div.onclick = () => selectPost(post.id);
+        listEl.appendChild(div);
+      });
+    }
 
-// 选中一条记录
-function selectPost(id) {
-  const post = posts.find(p => p.id === id);
-  if (!post) return;
+    // 选中一条
+    function selectPost(id) {
+      const post = posts.find(p => p.id === id);
+      if (!post) return;
 
-  currentId = id;
-  textarea.value = post.content;
-  renderList();
-}
+      currentId = id;
+      textarea.value = post.content;
+      renderList();
+    }
 
-// 保存当前内容
-saveBtn.onclick = () => {
-  if (currentId === null) return;
+    // 保存当前内容
+    saveBtn.onclick = () => {
+      if (currentId === null) return;
 
-  const post = posts.find(p => p.id === currentId);
-  post.content = textarea.value;
-  savePosts();
-  alert('已保存');
-};
+      const post = posts.find(p => p.id === currentId);
+      post.content = textarea.value;
+      savePosts();
+      alert('已保存');
+    };
 
-// 新建记录
-newBtn.onclick = () => {
-  const newId = posts.length ? Math.max(...posts.map(p => p.id)) + 1 : 1;
-  const newPost = { id: newId, title: '新记录', content: '' };
-  posts.push(newPost);
-  savePosts();
-  selectPost(newId);
-};
-
-// 删除当前记录
-deleteBtn.onclick = () => {
-  if (currentId === null) return;
-  posts = posts.filter(p => p.id !== currentId);
-  savePosts();
-  if (posts.length) {
+    // 启动
+    loadPosts();
     selectPost(posts[0].id);
-  } else {
-    currentId = null;
-    textarea.value = '';
-    renderList();
-  }
-};
-
-// 启动
-loadPosts();
-if (posts.length) {
-  selectPost(posts[0].id);
-}
-</script>
-
+  </script>
 
 </body>
 </html>
