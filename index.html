@@ -1,210 +1,169 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto" data-theme="auto">
-
+<html lang="zh-CN">
 <head>
-	<meta name="generator" content="Hugo 0.154.4"><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
-<title>my blog</title>
-
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="canonical" href="https://synapse75.github.io/blog/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://synapse75.github.io/blog/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://synapse75.github.io/blog/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://synapse75.github.io/blog/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://synapse75.github.io/blog/apple-touch-icon.png">
-<link rel="mask-icon" href="https://synapse75.github.io/blog/safari-pinned-tab.svg">
-<meta name="theme-color" content="#2e2e33">
-<meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://synapse75.github.io/blog/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="https://synapse75.github.io/blog/">
-<noscript>
-    <style>
-        #theme-toggle,
-        .top-link {
-            display: none;
-        }
-
-    </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --code-block-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-                color-scheme: dark;
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .toc {
-                background: var(--entry);
-            }
-        }
-
-        @media (prefers-color-scheme: light) {
-            .list::-webkit-scrollbar-thumb {
-                border-color: var(--code-bg);
-            }
-        }
-
-    </style>
-</noscript>
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.querySelector("html").dataset.theme = 'dark';
-    } else if (localStorage.getItem("pref-theme") === "light") {
-       document.querySelector("html").dataset.theme = 'light';
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.querySelector("html").dataset.theme = 'dark';
-    } else {
-        document.querySelector("html").dataset.theme = 'light';
+  <meta charset="UTF-8" />
+  <title>My Workspace</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      height: 100vh;
+      display: flex;
     }
 
-</script><meta property="og:url" content="https://synapse75.github.io/blog/">
-  <meta property="og:site_name" content="my blog">
-  <meta property="og:title" content="my blog">
-  <meta property="og:locale" content="zh-cn">
-  <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="my blog">
-<meta name="twitter:description" content="">
+    #sidebar {
+      width: 240px;
+      border-right: 1px solid #ddd;
+      padding: 12px;
+      box-sizing: border-box;
+    }
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "my blog",
-  "url": "https://synapse75.github.io/blog/",
-  "description": "",
-  "logo": "https://synapse75.github.io/blog/favicon.ico",
-  "sameAs": [
-      
-  ]
+    #sidebar h2 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .item {
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    .item.active {
+      background-color: #e0e0e0;
+      font-weight: bold;
+    }
+
+    .item:hover {
+      background-color: #f0f0f0;
+    }
+
+    #editor {
+      flex: 1;
+      padding: 12px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      font-size: 14px;
+      padding: 8px;
+    }
+
+    button {
+      margin-top: 8px;
+      width: 100px;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <h2>内容</h2>
+    <div id="list"></div>
+  </div>
+
+  <div id="editor">
+    <textarea id="content" placeholder="在这里写点什么……"></textarea>
+    <button id="saveBtn">保存</button>
+  </div>
+
+  <script>
+const STORAGE_KEY = 'my_workspace_posts';
+
+let posts = [];
+let currentId = null;
+
+const listEl = document.getElementById('list');
+const textarea = document.getElementById('content');
+const saveBtn = document.getElementById('saveBtn');
+const newBtn = document.getElementById('newBtn');
+const deleteBtn = document.getElementById('deleteBtn');
+
+// 初始化数据
+function loadPosts() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    posts = JSON.parse(raw);
+  } else {
+    posts = [
+      { id: 1, title: '第一条记录', content: '' },
+      { id: 2, title: '第二条记录', content: '' }
+    ];
+    savePosts();
+  }
+}
+
+// 保存到 localStorage
+function savePosts() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+}
+
+// 渲染左侧列表
+function renderList() {
+  listEl.innerHTML = '';
+  posts.forEach(post => {
+    const div = document.createElement('div');
+    div.className = 'item' + (post.id === currentId ? ' active' : '');
+    div.textContent = post.title;
+    div.onclick = () => selectPost(post.id);
+    listEl.appendChild(div);
+  });
+}
+
+// 选中一条记录
+function selectPost(id) {
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+
+  currentId = id;
+  textarea.value = post.content;
+  renderList();
+}
+
+// 保存当前内容
+saveBtn.onclick = () => {
+  if (currentId === null) return;
+
+  const post = posts.find(p => p.id === currentId);
+  post.content = textarea.value;
+  savePosts();
+  alert('已保存');
+};
+
+// 新建记录
+newBtn.onclick = () => {
+  const newId = posts.length ? Math.max(...posts.map(p => p.id)) + 1 : 1;
+  const newPost = { id: newId, title: '新记录', content: '' };
+  posts.push(newPost);
+  savePosts();
+  selectPost(newId);
+};
+
+// 删除当前记录
+deleteBtn.onclick = () => {
+  if (currentId === null) return;
+  posts = posts.filter(p => p.id !== currentId);
+  savePosts();
+  if (posts.length) {
+    selectPost(posts[0].id);
+  } else {
+    currentId = null;
+    textarea.value = '';
+    renderList();
+  }
+};
+
+// 启动
+loadPosts();
+if (posts.length) {
+  selectPost(posts[0].id);
 }
 </script>
-</head>
-<body class="list" id="top">
-    <header class="header">
-    <nav class="nav">
-        <div class="logo">
-            <a href="https://synapse75.github.io/blog/" accesskey="h" title="my blog (Alt + H)">my blog</a>
-            <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <ul id="menu">
-        </ul>
-    </nav>
-</header>
-<main class="main"> 
-    </main>
-    
-<footer class="footer">
-        <span>&copy; 2026 <a href="https://synapse75.github.io/blog/">my blog</a></span> · 
 
-    <span>
-        Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
-    </svg>
-</a>
 
-<script>
-    let menu = document.getElementById('menu');
-    if (menu) {
-        
-        const scrollPosition = localStorage.getItem("menu-scroll-position");
-        if (scrollPosition) {
-            menu.scrollLeft = parseInt(scrollPosition, 10);
-        }
-        
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = this.getAttribute("href").substr(1);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
-                    behavior: "smooth"
-                });
-            } else {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
-            }
-            if (id === "top") {
-                history.replaceState(null, null, " ");
-            } else {
-                history.pushState(null, null, `#${id}`);
-            }
-        });
-    });
-
-</script>
-<script>
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-
-</script>
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        const html = document.querySelector("html");
-        if (html.dataset.theme === "dark") {
-            html.dataset.theme = 'light';
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            html.dataset.theme = 'dark';
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
 </body>
-
 </html>
