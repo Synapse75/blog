@@ -3,154 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <title>My Workspace</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      height: 100vh;
-      display: flex;
-    }
-
-    #sidebar {
-      width: 240px;
-      border-right: 1px solid #ddd;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-
-    #sidebar h2 {
-      margin-top: 0;
-      font-size: 16px;
-    }
-
-    .item {
-      padding: 6px;
-      cursor: pointer;
-    }
-
-    .item.active {
-      background-color: #e0e0e0;
-      font-weight: bold;
-    }
-
-    .item:hover {
-      background-color: #f0f0f0;
-    }
-
-    #editor {
-      flex: 1;
-      padding: 12px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-    }
-
-    textarea {
-      flex: 1;
-      resize: none;
-      font-size: 14px;
-      padding: 8px;
-    }
-
-    button {
-      margin-top: 8px;
-      width: 100px;
-      padding: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div id="sidebar">
-    <h2>内容</h2>
-    <div id="list"></div>
-  </div>
+<div id="sidebar">
+  <h3>内容</h3>
+  <div id="list"></div>
+</div>
 
-  <div id="editor">
-    <input type="text" id="title" placeholder="标题..." />
-    <textarea id="content" placeholder="在这里写点什么……"></textarea>
-    <input type="file" id="fileInput" multiple />
-    <div id="fileList"></div>
+<div id="auth">
+  <input id="email" placeholder="你的邮箱" />
+  <button id="loginBtn">登录</button>
+  <button id="logoutBtn">退出</button>
+</div>
+
+
+<div id="editor">
+  <input id="title" placeholder="标题..." />
+  <textarea id="content" placeholder="写点什么吧……"></textarea>
+  <div>
     <button id="saveBtn">保存</button>
     <button id="newBtn">新建</button>
-    <button id="deleteBtn">删除</button>
   </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
-    const STORAGE_KEY = 'my_workspace_posts';
-
-    let posts = [];
-    let currentId = null;
-
-    const titleInput = document.getElementById('title');
-const fileInput = document.getElementById('fileInput');
-const fileListEl = document.getElementById('fileList');
-
-// 渲染右侧编辑区
-function renderEditor() {
-  if (currentId === null) {
-    titleInput.value = '';
-    textarea.value = '';
-    fileListEl.innerHTML = '';
-    return;
-  }
-  const post = posts.find(p => p.id === currentId);
-  titleInput.value = post.title;
-  textarea.value = post.content;
-
-  // 显示文件
-  fileListEl.innerHTML = '';
-  post.files = post.files || [];
-  post.files.forEach((f, idx) => {
-    const div = document.createElement('div');
-    const link = document.createElement('a');
-    link.href = f.data;
-    link.target = '_blank';
-    link.textContent = f.name;
-    div.appendChild(link);
-    fileListEl.appendChild(div);
-  });
-}
-
-// 保存当前内容
-saveBtn.onclick = () => {
-  if (currentId === null) return;
-  const post = posts.find(p => p.id === currentId);
-  post.title = titleInput.value;
-  post.content = textarea.value;
-  savePosts();
-  renderList();
-  alert('已保存');
-};
-
-// 文件选取
-fileInput.onchange = () => {
-  if (currentId === null) return;
-  const post = posts.find(p => p.id === currentId);
-  post.files = post.files || [];
-
-  Array.from(fileInput.files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      post.files.push({ name: file.name, data: e.target.result });
-      savePosts();
-      renderEditor();
-    };
-    reader.readAsDataURL(file);
-  });
-  fileInput.value = ''; // 清空文件选择器
-};
-
-// 修改 selectPost 函数结尾，渲染编辑器
-function selectPost(id) {
-  const post = posts.find(p => p.id === id);
-  if (!post) return;
-  currentId = id;
-  renderEditor();
-  renderList();
-}
-  </script>
+<script src="js/supabase.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
 
 </body>
 </html>

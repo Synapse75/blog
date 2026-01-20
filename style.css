@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  height: 100vh;
+  display: flex;
+}
+
+#sidebar {
+  width: 240px;
+  border-right: 1px solid #ddd;
+  padding: 12px;
+}
+
+#editor {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.item.active {
+  background: #e0e0e0;
+  font-weight: bold;
+}
+
+.item:hover {
+  background: #f0f0f0;
+}
