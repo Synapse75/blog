@@ -67,9 +67,15 @@
   </div>
 
   <div id="editor">
+    <input type="text" id="title" placeholder="标题..." />
     <textarea id="content" placeholder="在这里写点什么……"></textarea>
+    <input type="file" id="fileInput" multiple />
+    <div id="fileList"></div>
     <button id="saveBtn">保存</button>
+    <button id="newBtn">新建</button>
+    <button id="deleteBtn">删除</button>
   </div>
+
 
   <script>
     const STORAGE_KEY = 'my_workspace_posts';
@@ -77,63 +83,73 @@
     let posts = [];
     let currentId = null;
 
-    const listEl = document.getElementById('list');
-    const textarea = document.getElementById('content');
-    const saveBtn = document.getElementById('saveBtn');
+    const titleInput = document.getElementById('title');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
 
-    // 初始化数据
-    function loadPosts() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        posts = JSON.parse(raw);
-      } else {
-        posts = [
-          { id: 1, title: '第一条记录', content: '' },
-          { id: 2, title: '第二条记录', content: '' }
-        ];
-        savePosts();
-      }
-    }
+// 渲染右侧编辑区
+function renderEditor() {
+  if (currentId === null) {
+    titleInput.value = '';
+    textarea.value = '';
+    fileListEl.innerHTML = '';
+    return;
+  }
+  const post = posts.find(p => p.id === currentId);
+  titleInput.value = post.title;
+  textarea.value = post.content;
 
-    function savePosts() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-    }
+  // 显示文件
+  fileListEl.innerHTML = '';
+  post.files = post.files || [];
+  post.files.forEach((f, idx) => {
+    const div = document.createElement('div');
+    const link = document.createElement('a');
+    link.href = f.data;
+    link.target = '_blank';
+    link.textContent = f.name;
+    div.appendChild(link);
+    fileListEl.appendChild(div);
+  });
+}
 
-    // 渲染左侧列表
-    function renderList() {
-      listEl.innerHTML = '';
-      posts.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'item' + (post.id === currentId ? ' active' : '');
-        div.textContent = post.title;
-        div.onclick = () => selectPost(post.id);
-        listEl.appendChild(div);
-      });
-    }
+// 保存当前内容
+saveBtn.onclick = () => {
+  if (currentId === null) return;
+  const post = posts.find(p => p.id === currentId);
+  post.title = titleInput.value;
+  post.content = textarea.value;
+  savePosts();
+  renderList();
+  alert('已保存');
+};
 
-    // 选中一条
-    function selectPost(id) {
-      const post = posts.find(p => p.id === id);
-      if (!post) return;
+// 文件选取
+fileInput.onchange = () => {
+  if (currentId === null) return;
+  const post = posts.find(p => p.id === currentId);
+  post.files = post.files || [];
 
-      currentId = id;
-      textarea.value = post.content;
-      renderList();
-    }
-
-    // 保存当前内容
-    saveBtn.onclick = () => {
-      if (currentId === null) return;
-
-      const post = posts.find(p => p.id === currentId);
-      post.content = textarea.value;
+  Array.from(fileInput.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      post.files.push({ name: file.name, data: e.target.result });
       savePosts();
-      alert('已保存');
+      renderEditor();
     };
+    reader.readAsDataURL(file);
+  });
+  fileInput.value = ''; // 清空文件选择器
+};
 
-    // 启动
-    loadPosts();
-    selectPost(posts[0].id);
+// 修改 selectPost 函数结尾，渲染编辑器
+function selectPost(id) {
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  currentId = id;
+  renderEditor();
+  renderList();
+}
   </script>
 
 </body>
