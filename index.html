@@ -7,31 +7,89 @@
 </head>
 <body>
 
-<div id="sidebar">
-  <h3>内容</h3>
-  <div id="list"></div>
+<!-- 顶部 Bar -->
+<div id="topBar" class="top-bar">
+  <h1 class="logo">My Blog</h1>
+  <div id="loginButtonContainer" class="login-button-container">
+    <button id="loginBtn">登录</button>
+  </div>
 </div>
 
-<div id="auth">
-  <input id="email" placeholder="你的邮箱" />
-  <button id="loginBtn">登录</button>
-  <button id="logoutBtn">退出</button>
+<!-- 主要内容区域 -->
+<div id="mainContainer" class="main-container">
+  <!-- 左侧 Tag 栏 -->
+  <div id="sidebar" class="sidebar">
+    <h3>标签</h3>
+    <div id="tagsList" class="tags-list"></div>
+  </div>
+
+  <!-- 右侧内容区域 -->
+  <div id="contentArea" class="content-area">
+    <!-- 文章列表页面 -->
+    <div id="postsArea" class="posts-area">
+      <div id="postsList" class="posts-list"></div>
+    </div>
+
+    <!-- 编辑页面 -->
+    <div id="editorPage" class="editor-page hidden">
+      <div class="editor-header">
+        <button id="backBtn" class="back-btn">← 返回</button>
+      </div>
+
+      <div class="editor-content">
+        <input id="title" placeholder="标题..." />
+        <textarea id="content" placeholder="写点什么吧……"></textarea>
+
+        <!-- 标签编辑区 -->
+        <div id="tagsArea" class="tags-area">
+          <input id="tagInput" type="text" placeholder="输入新标签，按 Enter 添加" class="tag-input" />
+          <div id="currentTagsList" class="tags-list-editor"></div>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <button id="saveBtn">保存</button>
+        <button id="newBtn">新建</button>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- 登录模态框 -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>登录</h2>
+      <button id="closeLoginBtn" class="close-btn">✕</button>
+    </div>
+    <input id="email" type="email" placeholder="邮箱" />
+    <input id="password" type="password" placeholder="密码" />
+    <button id="confirmLoginBtn">登录</button>
+    <p style="text-align: center; margin: 12px 0; color: #666;">还没有账号？<a href="#" id="goRegisterBtn" style="color: #0066cc; cursor: pointer;">注册</a></p>
+  </div>
+</div>
 
-<div id="editor">
-  <input id="title" placeholder="标题..." />
-  <textarea id="content" placeholder="写点什么吧……"></textarea>
-  <div>
-    <button id="saveBtn">保存</button>
-    <button id="newBtn">新建</button>
+<!-- 注册模态框 -->
+<div id="registerModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>注册</h2>
+      <button id="closeRegisterBtn" class="close-btn">✕</button>
+    </div>
+    <input id="regUsername" type="text" placeholder="用户名" />
+    <input id="regEmail" type="email" placeholder="邮箱" />
+    <input id="regPassword" type="password" placeholder="密码" />
+    <button id="confirmRegisterBtn">注册</button>
+    <p style="text-align: center; margin: 12px 0; color: #666;">已有账号？<a href="#" id="goLoginBtn" style="color: #0066cc; cursor: pointer;">登录</a></p>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="js/supabase.js"></script>
 <script src="js/state.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/posts.js"></script>
+<script src="js/tags.js"></script>
 <script src="js/ui.js"></script>
 
 </body>

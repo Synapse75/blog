@@ -7,10 +7,19 @@ async function loadPosts() {
 
   const { data, error } = await sb
     .from('posts')
-    .select('*')
-    .eq('author_id', user.id)
-    .order('created_at', { ascending: false })
+    .select(`
+      *,
+      post_tags (
+        tags (*)
+      )
+    `)
+    .order('updated_at', { ascending: false, nullsFirst: false })
 
   if (error) throw error
-  posts = data || []
+  
+  // 将 post_tags 数组转换为 tags 数组
+  posts = (data || []).map(post => ({
+    ...post,
+    tags: (post.post_tags || []).map(pt => pt.tags)
+  }))
 }
