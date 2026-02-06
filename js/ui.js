@@ -1,3 +1,29 @@
+// 加载 GitHub 信息
+async function loadGitHubStats() {
+  try {
+    const response = await fetch('https://api.github.com/users/synapse75')
+    if (!response.ok) throw new Error('Failed to fetch')
+
+    const data = await response.json()
+    const repos = data.public_repos || 0
+    const followers = data.followers || 0
+
+    // 统计 Stars（最多前 100 个仓库）
+    let stars = 0
+    const reposRes = await fetch('https://api.github.com/users/synapse75/repos?per_page=100')
+    if (reposRes.ok) {
+      const reposData = await reposRes.json()
+      stars = reposData.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0)
+    }
+
+    document.getElementById('githubStars').textContent = stars
+    document.getElementById('githubFollowers').textContent = followers
+    document.getElementById('githubRepos').textContent = repos
+  } catch (error) {
+    console.error('加载 GitHub 信息失败:', error)
+  }
+}
+
 // js/ui.js
 const loginBtn = document.getElementById('loginBtn')
 const emailInput = document.getElementById('email')
@@ -22,6 +48,13 @@ const backBtn = document.getElementById('backBtn')
 
 // 等待 DOM 完全加载后再绑定事件
 document.addEventListener('DOMContentLoaded', () => {
+  const logoLink = document.getElementById('logoLink')
+  if (logoLink) {
+    logoLink.addEventListener('click', () => {
+      switchTab('posts')
+    })
+  }
+
   // ========== 顶部导航 Tab 切换 ==========
   document.querySelectorAll('.nav-link').forEach(link => {
     link.onclick = (e) => {
@@ -82,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ========== 初始化应用 ==========
   initializeApp()
+    loadGitHubStats()
 })
 
 // Tab 切换函数
