@@ -17,9 +17,15 @@ async function loadPosts() {
 
   if (error) throw error
   
-  // 将 post_tags 数组转换为 tags 数组
+  // 将 post_tags 数组转换为 tags 数组，标记来源
   posts = (data || []).map(post => ({
     ...post,
-    tags: (post.post_tags || []).map(pt => pt.tags)
+    tags: (post.post_tags || []).map(pt => pt.tags),
+    source: 'supabase'
   }))
+}
+
+// 获取所有文章（本地 + Supabase 合并）
+function getAllPosts() {
+  return [...localPosts, ...posts]
 }

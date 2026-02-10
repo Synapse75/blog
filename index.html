@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>My Workspace</title>
+  <title>My Blog</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,120 +16,114 @@
     <a href="#" class="nav-link" data-tab="tags">标签</a>
     <a href="#" class="nav-link" data-tab="about">关于</a>
   </nav>
-  <div id="loginButtonContainer" class="login-button-container">
+  <div class="login-button-container">
     <button id="loginBtn">登录</button>
+    <button id="logoutBtn" class="hidden">退出</button>
+  </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>登录</h2>
+      <button id="closeLoginBtn">&times;</button>
+    </div>
+    <input type="email" id="loginEmail" placeholder="邮箱" />
+    <input type="password" id="loginPassword" placeholder="密码" />
+    <button id="confirmLoginBtn">登录</button>
+    <p>没有账号？<a href="#" id="goRegisterBtn">去注册</a></p>
+  </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div id="registerModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>注册</h2>
+      <button id="closeRegisterBtn">&times;</button>
+    </div>
+    <input type="text" id="regUsername" placeholder="用户名" />
+    <input type="email" id="regEmail" placeholder="邮箱" />
+    <input type="password" id="regPassword" placeholder="密码" />
+    <button id="confirmRegisterBtn">注册</button>
+    <p>已有账号？<a href="#" id="goLoginBtn">去登录</a></p>
   </div>
 </div>
 
 <!-- 主要内容区域 -->
 <div id="mainContainer" class="main-container">
-  <!-- 左侧栏：最近更新的文章 -->
+  <!-- 左侧栏 -->
   <div id="sidebar" class="sidebar">
-      <!-- GitHub 信息 -->
-      <div class="github-info">
-        <a href="https://synapse75.github.io" class="github-avatar-link" target="_blank" rel="noopener">
-          <img src="https://github.com/synapse75.png" alt="GitHub Avatar" class="github-avatar">
+    <!-- GitHub 信息 -->
+    <div class="github-info">
+      <a href="https://synapse75.github.io" class="github-avatar-link" target="_blank" rel="noopener">
+        <img src="https://github.com/synapse75.png" alt="GitHub Avatar" class="github-avatar">
+      </a>
+      <p class="github-name">Synapse75</p>
+      <div class="github-stats">
+        <a class="github-stat" href="https://github.com/synapse75?tab=stars" target="_blank" rel="noopener">
+          <span class="github-stat-value" id="githubStars">-</span>
+          <span class="github-stat-label">Stars</span>
         </a>
-        <p class="github-name">Synapse75</p>
-        <div class="github-stats">
-          <a class="github-stat" href="https://github.com/synapse75?tab=stars" target="_blank" rel="noopener">
-            <span class="github-stat-value" id="githubStars">-</span>
-            <span class="github-stat-label">Stars</span>
-          </a>
-          <a class="github-stat" href="https://github.com/synapse75?tab=followers" target="_blank" rel="noopener">
-            <span class="github-stat-value" id="githubFollowers">-</span>
-            <span class="github-stat-label">Followers</span>
-          </a>
-          <a class="github-stat" href="https://github.com/synapse75?tab=repositories" target="_blank" rel="noopener">
-            <span class="github-stat-value" id="githubRepos">-</span>
-            <span class="github-stat-label">Repos</span>
-          </a>
-        </div>
-        <a class="github-follow-btn" href="https://github.com/synapse75" target="_blank" rel="noopener">Follow</a>
+        <a class="github-stat" href="https://github.com/synapse75?tab=followers" target="_blank" rel="noopener">
+          <span class="github-stat-value" id="githubFollowers">-</span>
+          <span class="github-stat-label">Followers</span>
+        </a>
+        <a class="github-stat" href="https://github.com/synapse75?tab=repositories" target="_blank" rel="noopener">
+          <span class="github-stat-value" id="githubRepos">-</span>
+          <span class="github-stat-label">Repos</span>
+        </a>
       </div>
-    
-      <!-- 最近更新 -->
-      <div class="recent-section">
-        <h3>最近更新</h3>
-        <div id="recentList" class="recent-list"></div>
-      </div>
+      <a class="github-follow-btn" href="https://github.com/synapse75" target="_blank" rel="noopener">Follow</a>
+    </div>
+
+    <!-- 最近更新 -->
+    <div class="recent-section">
+      <h3>最近更新</h3>
+      <div id="recentList" class="recent-list"></div>
+    </div>
   </div>
 
   <!-- 右侧内容区域 -->
   <div id="contentArea" class="content-area">
-    <!-- 文章列表页面 -->
+    <!-- 文章列表 -->
     <div id="postsArea" class="posts-area tab-page">
       <div id="postsList" class="posts-list"></div>
     </div>
 
-      <!-- 文章详情页面 -->
-      <div id="postDetailPage" class="post-detail-page"></div>
+    <!-- 文章详情 -->
+    <div id="postDetailPage" class="post-detail-page"></div>
+
+    <!-- 分类页面 -->
+    <div id="categoriesPage" class="tab-page hidden">
+      <div id="categoriesPageList" class="tags-page-list"></div>
+    </div>
 
     <!-- 标签页面 -->
     <div id="tagsPage" class="tags-page tab-page hidden">
       <div id="tagsPageList" class="tags-page-list"></div>
     </div>
 
-    <!-- 编辑页面 -->
-    <div id="editorPage" class="editor-page hidden">
-      <div class="editor-header">
-        <button id="backBtn" class="back-btn">← 返回</button>
-      </div>
-
-      <div class="editor-content">
-        <input id="title" placeholder="标题..." />
-        <textarea id="content" placeholder="写点什么吧……"></textarea>
-
-        <!-- 标签编辑区 -->
-        <div id="tagsArea" class="tags-area">
-          <input id="tagInput" type="text" placeholder="输入新标签，按 Enter 添加" class="tag-input" />
-          <div id="currentTagsList" class="tags-list-editor"></div>
-        </div>
-      </div>
-
-      <div class="editor-footer">
-        <button id="saveBtn">保存</button>
-        <button id="newBtn">新建</button>
+    <!-- 关于页面 -->
+    <div id="aboutPage" class="tab-page hidden">
+      <div class="about-content" style="padding: 20px; color: #ccc;">
+        <h2>关于</h2>
+        <p>这是一个使用 Markdown + GitHub Pages 搭建的纯静态博客。</p>
+        <p>文章全部以本地 Markdown 文件编写，通过构建脚本生成索引。</p>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- 登录模态框 -->
-<div id="loginModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>登录</h2>
-      <button id="closeLoginBtn" class="close-btn">✕</button>
-    </div>
-    <input id="email" type="email" placeholder="邮箱" />
-    <input id="password" type="password" placeholder="密码" />
-    <button id="confirmLoginBtn">登录</button>
-    <p style="text-align: center; margin: 12px 0; color: #666;">还没有账号？<a href="#" id="goRegisterBtn" style="color: #0066cc; cursor: pointer;">注册</a></p>
-  </div>
-</div>
-
-<!-- 注册模态框 -->
-<div id="registerModal" class="modal hidden">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>注册</h2>
-      <button id="closeRegisterBtn" class="close-btn">✕</button>
-    </div>
-    <input id="regUsername" type="text" placeholder="用户名" />
-    <input id="regEmail" type="email" placeholder="邮箱" />
-    <input id="regPassword" type="password" placeholder="密码" />
-    <button id="confirmRegisterBtn">注册</button>
-    <p style="text-align: center; margin: 12px 0; color: #666;">已有账号？<a href="#" id="goLoginBtn" style="color: #0066cc; cursor: pointer;">登录</a></p>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="js/supabase.js"></script>
-<script src="js/state.js"></script>
+<script src="js/md-loader.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/interactions.js"></script>
 <script src="js/posts.js"></script>
-<script src="js/tags.js"></script>
+<script src="js/router.js"></script>
 <script src="js/ui.js"></script>
 
 </body>

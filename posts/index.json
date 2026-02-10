@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Hello World",
+    "slug": "hello-world",
+    "date": "2026-02-10",
+    "created_at": "2026-02-10T16:16:40.046Z",
+    "updated_at": "2026-02-10T16:58:56.376Z",
+    "category": "示例",
+    "tags": [
+      "示例",
+      "博客"
+    ],
+    "file": "示例/hello-world.md",
+    "excerpt": "这是第一篇 Markdown 文章，用来演示写作工作流。    1. 在 posts/ 目录（或子文件夹）创建 .md 文件，文件名随意 2. 子文件夹名 = 分类（如 posts/技术/xxx.md） 3. 正文第一行 # 标题 自动作为文章标题 4. 日期自动检测（git 首次提交 / 文件创建时间） 5. 运行 node build.js 生成索引，推送即可    bash node new"
+  }
+]
