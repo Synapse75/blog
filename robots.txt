@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://synapse75.github.io/blog/sitemap.xml

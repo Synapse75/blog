@@ -195,6 +195,141 @@ function buildIndex() {
   if (recent.length > 0) {
     console.log(`   最近更新: ${recent[0].title} (${new Date(recent[0].updated_at).toLocaleString()})`)
   }
+
+  return posts
 }
 
-buildIndex()
+// ========== HTML 转义（构建时用）==========
+function escapeHtmlBuild(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+// ========== 站点配置 ==========
+const SITE_URL = 'https://synapse75.github.io/blog'
+
+// ========== 为每篇文章生成独立的静态 HTML 页面（SEO 友好）==========
+async function buildStaticPages(posts) {
+  const { marked } = await import('marked')
+
+  let generated = 0
+
+  for (const post of posts) {
+    const [year, month, day] = post.date.split('-')
+    const dirPath = path.join(__dirname, year, month, day, post.slug)
+
+    // 读取原始 Markdown
+    const filePath = path.join(POSTS_DIR, post.file)
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const { body } = parseFrontMatter(content)
+
+    // 去掉标题行（页面已有 <h1>）
+    const bodyNoTitle = body.replace(/^#{1,2}\s+.+\r?\n+/, '').trim()
+    let htmlContent = marked.parse(bodyNoTitle)
+
+    // 为所有图片添加 lazy loading
+    htmlContent = htmlContent.replace(/<img /g, '<img loading="lazy" ')
+
+    // 根路径（始终 4 层深度：year/month/day/slug）
+    const rootPath = '../../../../'
+    const encodedSlug = encodeURIComponent(post.slug)
+    const postUrl = `${SITE_URL}/${year}/${month}/${day}/${encodedSlug}/`
+
+    // 分类 HTML
+    const categoryHtml = post.category
+      ? `<div class="post-detail-meta-item post-detail-category">${escapeHtmlBuild(post.category)}</div>`
+      : ''
+
+    // 标签 HTML
+    const tagsHtml = (post.tags && post.tags.length > 0)
+      ? `<div class="post-detail-tags">${post.tags.map(t => `<span class="post-detail-tag">${escapeHtmlBuild(t)}</span>`).join('')}</div>`
+      : ''
+
+    const pageHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtmlBuild(post.title)} - Blog</title>
+  <meta name="description" content="${escapeHtmlBuild(post.excerpt)}">
+  <meta property="og:title" content="${escapeHtmlBuild(post.title)}">
+  <meta property="og:description" content="${escapeHtmlBuild(post.excerpt)}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${postUrl}">
+  <meta property="og:site_name" content="Synapse75 Blog">
+  <meta property="article:published_time" content="${post.created_at}">
+  <meta property="article:modified_time" content="${post.updated_at}">
+  ${post.tags.map(t => `<meta property="article:tag" content="${escapeHtmlBuild(t)}">`).join('\n  ')}
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="${escapeHtmlBuild(post.title)}">
+  <meta name="twitter:description" content="${escapeHtmlBuild(post.excerpt)}">
+  <link rel="canonical" href="${postUrl}">
+  <link rel="icon" href="https://github.com/synapse75.png" type="image/png">
+  <link rel="stylesheet" href="${rootPath}style.css">
+</head>
+<body>
+  <div class="static-page">
+    <nav class="static-nav">
+      <a href="${rootPath}" class="static-nav-home">← 博客首页</a>
+      <a href="${rootPath}#/post/${post.date}/${encodedSlug}" class="static-nav-interactive">💬 互动版</a>
+    </nav>
+    <article>
+      <div class="post-detail-header">
+        <h1 class="post-detail-title">${escapeHtmlBuild(post.title)}</h1>
+        <div class="post-detail-meta">
+          ${categoryHtml}
+          <div class="post-detail-meta-item">📅 ${post.date}</div>
+        </div>
+        ${tagsHtml}
+      </div>
+      <div class="post-detail-content markdown-body">${htmlContent}</div>
+    </article>
+    <footer class="static-footer">
+      <a href="${rootPath}#/post/${post.date}/${encodedSlug}">💬 查看评论与互动</a>
+      <span class="static-footer-sep">·</span>
+      <a href="${rootPath}">← 返回首页</a>
+    </footer>
+  </div>
+</body>
+</html>`
+
+    fs.mkdirSync(dirPath, { recursive: true })
+    fs.writeFileSync(path.join(dirPath, 'index.html'), pageHtml, 'utf-8')
+    generated++
+  }
+
+  console.log(`   生成了 ${generated} 个静态 SEO 页面`)
+}
+
+// ========== 生成 sitemap.xml ==========
+function buildSitemap(posts) {
+  const now = new Date().toISOString().slice(0, 10)
+
+  const urls = [
+    `  <url>\n    <loc>${SITE_URL}/</loc>\n    <lastmod>${now}</lastmod>\n    <priority>1.0</priority>\n  </url>`
+  ]
+
+  for (const post of posts) {
+    const [year, month, day] = post.date.split('-')
+    const encodedSlug = encodeURIComponent(post.slug)
+    const lastmod = post.updated_at.slice(0, 10)
+    urls.push(`  <url>\n    <loc>${SITE_URL}/${year}/${month}/${day}/${encodedSlug}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <priority>0.8</priority>\n  </url>`)
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`
+
+  fs.writeFileSync(path.join(__dirname, 'sitemap.xml'), xml, 'utf-8')
+  console.log(`   生成了 sitemap.xml（${urls.length} 个 URL）`)
+}
+
+// ========== 主流程 ==========
+async function main() {
+  const posts = buildIndex()
+  await buildStaticPages(posts)
+  buildSitemap(posts)
+}
+
+main()

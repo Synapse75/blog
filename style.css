@@ -980,3 +980,67 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ========== 静态 SEO 页面 ========== */
+.static-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  min-height: 100vh;
+  background: white;
+}
+
+.static-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 28px;
+}
+
+.static-nav a {
+  color: #1890ff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.static-nav a:hover {
+  color: #0066cc;
+}
+
+.static-footer {
+  margin-top: 48px;
+  padding: 20px 0;
+  border-top: 1px solid #eee;
+  text-align: center;
+  font-size: 14px;
+  color: #999;
+}
+
+.static-footer a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.static-footer a:hover {
+  text-decoration: underline;
+}
+
+.static-footer-sep {
+  margin: 0 12px;
+  color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .static-page {
+    padding: 12px 16px;
+  }
+  .static-nav {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}

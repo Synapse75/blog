@@ -45,6 +45,11 @@ function renderPostsList(postsToRender) {
     card.className = 'post-card'
     card.style.cursor = 'pointer'
     card.onclick = () => navigateTo(getPostHash(post))
+
+    // 鼠标悬停时预加载文章内容
+    card.onmouseenter = () => {
+      if (!post._contentLoaded) loadLocalPostContent(post)
+    }
     
     // 分类标签（位于标题上方，灰色小字）
     if (post.category) {
@@ -178,6 +183,8 @@ function showPostDetail(post) {
   } else {
     contentHtml = escapeHtml(post.content || '').replace(/\n/g, '<br>')
   }
+  // 为所有图片添加懒加载
+  contentHtml = contentHtml.replace(/<img /g, '<img loading="lazy" ')
   
   detailPage.innerHTML = `
     <button class="back-to-list-btn" onclick="backToPostsList()">← 返回列表</button>
