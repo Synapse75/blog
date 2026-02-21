@@ -158,14 +158,6 @@ function showPostDetail(post) {
     metaItems.push(`<div class="post-detail-meta-item post-detail-category">${escapeHtml(post.category)}</div>`)
   }
   
-  // 创建日期
-  const createdDate = new Date(post.created_at).toLocaleDateString('zh-CN')
-  metaItems.push(`<div class="post-detail-meta-item">创建于 ${createdDate}</div>`)
-  
-  // 更新时间
-  const updateTime = new Date(post.updated_at).toLocaleString('zh-CN')
-  metaItems.push(`<div class="post-detail-meta-item">更新于 ${updateTime}</div>`)
-  
   // 标签
   let tagsHtml = ''
   if (post.tags && post.tags.length > 0) {
