@@ -118,13 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const githubLoginBtn = document.getElementById('githubLoginBtn')
   if (githubLoginBtn) githubLoginBtn.onclick = handleGitHubLogin
 
-  const confirmLoginBtn = document.getElementById('confirmLoginBtn')
-  if (confirmLoginBtn) confirmLoginBtn.onclick = handleUsernameLogin
-
-  // 用户名输入框回车登录
-  const loginUsername = document.getElementById('loginUsername')
-  if (loginUsername) loginUsername.onkeydown = (e) => { if (e.key === 'Enter') handleUsernameLogin() }
-
   // 初始化
   initializeApp()
   loadGitHubStats()

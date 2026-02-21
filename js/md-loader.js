@@ -1,6 +1,6 @@
 // js/md-loader.js — 加载本地 Markdown 文章（纯静态，无后端）
-let localPosts = []
-let allCategories = []
+var localPosts = []
+var allCategories = []
 
 // 从 posts/index.json 加载文章索引
 async function loadLocalPosts() {

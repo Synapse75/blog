@@ -31,8 +31,6 @@ function openLoginModal() {
 
 function closeLoginModal() {
   document.getElementById('loginModal').classList.add('hidden')
-  const usernameInput = document.getElementById('loginUsername')
-  if (usernameInput) usernameInput.value = ''
 }
 
 async function handleGitHubLogin() {
@@ -43,26 +41,6 @@ async function handleGitHubLogin() {
     }
   })
   if (error) alert(error.message)
-}
-
-async function handleUsernameLogin() {
-  const input = document.getElementById('loginUsername')
-  const username = input.value.trim()
-  if (!username) return alert('请输入用户名')
-
-  // 使用 Supabase 匿名登录，然后设置用户名
-  const { data, error } = await sb.auth.signInAnonymously()
-  if (error) return alert('登录失败: ' + error.message)
-
-  // 将用户名写入 user_metadata
-  await sb.auth.updateUser({ data: { username } })
-
-  currentUser = data.user
-  currentUser.user_metadata = { ...currentUser.user_metadata, username }
-  isLoggedIn = true
-  updateLoginUI()
-  closeLoginModal()
-  refreshInteractions()
 }
 
 async function handleLogout() {
