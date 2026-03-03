@@ -1,5 +1,17 @@
 [
   {
+    "title": "变量",
+    "slug": "变量",
+    "date": "2026-03-03",
+    "created_at": "2026-03-03T16:50:15+08:00",
+    "updated_at": "2026-03-03T16:50:15+08:00",
+    "category": "学习",
+    "subcategory": "Golang",
+    "tags": [],
+    "file": "学习/Golang/变量.md",
+    "excerpt": ""
+  },
+  {
     "title": "终末地普攻",
     "slug": "终末地普攻",
     "date": "2026-02-25",
