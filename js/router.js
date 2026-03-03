@@ -5,6 +5,7 @@
 // #/tag/标签名              → 按标签筛选
 // #/categories              → 分类页
 // #/category/分类名         → 按分类筛选
+// #/category/分类名/子分类名 → 按子分类筛选
 // #/about                   → 关于
 
 function navigateTo(hash) {
@@ -44,10 +45,11 @@ async function handleRoute() {
     return
   }
 
-  // #/category/名称
-  const catMatch = hash.match(/^#\/category\/(.+)$/)
+  // #/category/名称 或 #/category/名称/子分类名
+  const catMatch = hash.match(/^#\/category\/([^/]+)(?:\/(.+))?$/)
   if (catMatch) {
     selectedCategory = decodeURIComponent(catMatch[1])
+    selectedSubcategory = catMatch[2] ? decodeURIComponent(catMatch[2]) : null
     selectedTagId = null
     switchTab('posts')
     return
@@ -59,6 +61,7 @@ async function handleRoute() {
 
   selectedTagId = null
   selectedCategory = null
+  selectedSubcategory = null
 
   switch (route) {
     case 'tags':

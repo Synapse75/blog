@@ -15,6 +15,7 @@ export interface Post {
   content: string
   excerpt: string
   category: string
+  subcategory: string
   tags: PostTag[]
   file: string
   created_at: string

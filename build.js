@@ -105,8 +105,8 @@ function getGitUpdatedDate(filePath) {
   return null
 }
 
-// ========== 递归扫描 MD 文件 ==========
-function scanPosts(dir, category = '') {
+// ========== 递归扫描 MD 文件（支持子分类，最多两级文件夹）==========
+function scanPosts(dir, category = '', subcategory = '', depth = 0) {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
   const results = []
 
@@ -116,10 +116,16 @@ function scanPosts(dir, category = '') {
     if (entry.isDirectory()) {
       // 跳过隐藏文件夹和 node_modules
       if (entry.name.startsWith('.') || entry.name === 'node_modules') continue
-      // 子文件夹名 = 分类
-      results.push(...scanPosts(fullPath, entry.name))
+      if (depth === 0) {
+        // 第一级文件夹 = 分类
+        results.push(...scanPosts(fullPath, entry.name, '', 1))
+      } else if (depth === 1) {
+        // 第二级文件夹 = 子分类
+        results.push(...scanPosts(fullPath, category, entry.name, 2))
+      }
+      // depth >= 2 不再递归子文件夹
     } else if (entry.name.endsWith('.md')) {
-      results.push({ filePath: fullPath, fileName: entry.name, category })
+      results.push({ filePath: fullPath, fileName: entry.name, category, subcategory })
     }
   }
 
@@ -136,7 +142,7 @@ function buildIndex() {
   const files = scanPosts(POSTS_DIR)
   const posts = []
 
-  for (const { filePath, fileName, category } of files) {
+  for (const { filePath, fileName, category, subcategory } of files) {
     // 跳过 index.json
     if (fileName === 'index.json') continue
 
@@ -183,6 +189,7 @@ function buildIndex() {
       created_at: createdAt,
       updated_at: updatedAt,
       category,
+      subcategory: subcategory || '',
       tags: meta.tags || [],
       file: relPath,
       excerpt
@@ -196,12 +203,14 @@ function buildIndex() {
 
   // 统计
   const categories = [...new Set(posts.map(p => p.category).filter(Boolean))]
+  const subcategories = [...new Set(posts.map(p => p.subcategory).filter(Boolean))]
   const tagSet = new Set()
   posts.forEach(p => (p.tags || []).forEach(t => tagSet.add(t)))
 
   console.log(`已生成 posts/index.json`)
   console.log(`   ${posts.length} 篇文章`)
   if (categories.length) console.log(`   分类: ${categories.join(', ')}`)
+  if (subcategories.length) console.log(`   子分类: ${subcategories.join(', ')}`)
   if (tagSet.size) console.log(`   标签: ${[...tagSet].join(', ')}`)
 
   const recent = [...posts].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))

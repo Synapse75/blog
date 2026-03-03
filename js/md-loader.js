@@ -1,6 +1,7 @@
 // js/md-loader.js — 加载本地 Markdown 文章（纯静态，无后端）
 var localPosts = []
 var allCategories = []
+var allSubcategories = {}  // { 分类名: [子分类名, ...] }
 
 // 从 posts/index.json 加载文章索引
 async function loadLocalPosts() {
@@ -20,6 +21,7 @@ async function loadLocalPosts() {
       content: item.excerpt || '',
       excerpt: item.excerpt || '',
       category: item.category || '',
+      subcategory: item.subcategory || '',
       tags: (item.tags || []).map(name => ({ name, id: 'tag:' + name })),
       file: item.file,
       created_at: item.created_at,
@@ -27,10 +29,21 @@ async function loadLocalPosts() {
       _contentLoaded: false
     }))
 
-    // 提取所有分类
+    // 提取所有分类和子分类
     const catSet = new Set()
-    localPosts.forEach(p => { if (p.category) catSet.add(p.category) })
+    const subMap = {}
+    localPosts.forEach(p => {
+      if (p.category) {
+        catSet.add(p.category)
+        if (!subMap[p.category]) subMap[p.category] = new Set()
+        if (p.subcategory) subMap[p.category].add(p.subcategory)
+      }
+    })
     allCategories = [...catSet].sort()
+    allSubcategories = {}
+    for (const cat of allCategories) {
+      allSubcategories[cat] = subMap[cat] ? [...subMap[cat]].sort() : []
+    }
   } catch (e) {
     console.warn('加载本地文章索引失败:', e)
   }

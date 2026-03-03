@@ -1,6 +1,7 @@
 // js/posts.js — 文章列表、详情、分类（纯静态）
 let selectedTagId = null
 let selectedCategory = null
+let selectedSubcategory = null
 
 // ========== 左侧栏：最近更新的文章 ==========
 function renderRecentSidebar() {
@@ -126,6 +127,9 @@ function displayPosts() {
   
   if (selectedCategory) {
     postsToDisplay = postsToDisplay.filter(p => p.category === selectedCategory)
+    if (selectedSubcategory) {
+      postsToDisplay = postsToDisplay.filter(p => p.subcategory === selectedSubcategory)
+    }
   }
   
   if (selectedTagId) {
@@ -209,7 +213,7 @@ function renderCategoriesPage() {
   const container = document.getElementById('categoriesPageList')
   if (!container) return
   container.innerHTML = ''
-  container.className = 'categories-grid'
+  container.className = 'categories-list'
 
   if (allCategories.length === 0) {
     container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">暂无分类</p>'
@@ -222,9 +226,14 @@ function renderCategoriesPage() {
     .sort((a, b) => b.count - a.count)
 
   sorted.forEach(({ name: cat, count }) => {
-    const el = document.createElement('div')
-    el.className = 'category-card'
-    el.onclick = () => navigateTo('#/category/' + encodeURIComponent(cat))
+    const subs = allSubcategories[cat] || []
+    const card = document.createElement('div')
+    card.className = 'category-card-large'
+
+    // 上半部分：分类名 + 文章数
+    const header = document.createElement('div')
+    header.className = 'category-card-header'
+    header.onclick = () => navigateTo('#/category/' + encodeURIComponent(cat))
 
     const nameEl = document.createElement('div')
     nameEl.className = 'category-card-name'
@@ -234,9 +243,48 @@ function renderCategoriesPage() {
     countEl.className = 'category-card-count'
     countEl.textContent = count + ' 篇文章'
 
-    el.appendChild(nameEl)
-    el.appendChild(countEl)
-    container.appendChild(el)
+    header.appendChild(nameEl)
+    header.appendChild(countEl)
+    card.appendChild(header)
+
+    // 下半部分：子分类
+    if (subs.length > 0) {
+      const subsContainer = document.createElement('div')
+      subsContainer.className = 'subcategory-list'
+
+      // 子分类也按文章数排序
+      const sortedSubs = subs
+        .map(sub => ({
+          name: sub,
+          count: localPosts.filter(p => p.category === cat && p.subcategory === sub).length
+        }))
+        .sort((a, b) => b.count - a.count)
+
+      sortedSubs.forEach(({ name: sub, count: subCount }) => {
+        const subEl = document.createElement('div')
+        subEl.className = 'subcategory-chip'
+        subEl.onclick = (e) => {
+          e.stopPropagation()
+          navigateTo('#/category/' + encodeURIComponent(cat) + '/' + encodeURIComponent(sub))
+        }
+
+        const subName = document.createElement('span')
+        subName.className = 'subcategory-chip-name'
+        subName.textContent = sub
+
+        const subCountEl = document.createElement('span')
+        subCountEl.className = 'subcategory-chip-count'
+        subCountEl.textContent = subCount
+
+        subEl.appendChild(subName)
+        subEl.appendChild(subCountEl)
+        subsContainer.appendChild(subEl)
+      })
+
+      card.appendChild(subsContainer)
+    }
+
+    container.appendChild(card)
   })
 }
 
