@@ -150,13 +150,12 @@ function buildIndex() {
     const stat = fs.statSync(filePath)
     const { meta, body } = parseFrontMatter(content)
 
-    // 标题：从正文第一个 # 提取
-    const title = extractTitle(body)
+    // 标题：正文第一个 #，没有则用文件名（去掉.md）
+    let title = extractTitle(body)
+    const fileBaseName = fileName.replace(/\.md$/i, '')
     if (!title) {
-      console.warn(`⚠️  跳过 ${fileName}：正文中没有 # 标题`)
-      continue
+      title = fileBaseName
     }
-
     // slug：优先 front matter，否则从文件名生成
     const slug = meta.slug || fileNameToSlug(fileName)
 
@@ -300,6 +299,7 @@ async function buildStaticPages(posts) {
     </nav>
     <article>
       <div class="post-detail-header">
+        <div class="post-filename-subtitle">${escapeHtmlBuild(post.file.replace(/\.md$/i, ''))}</div>
         <h1 class="post-detail-title">${escapeHtmlBuild(post.title)}</h1>
         <div class="post-detail-meta">
           ${categoryHtml}
