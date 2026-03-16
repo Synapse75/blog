@@ -238,6 +238,7 @@ async function buildStaticPages(posts) {
 
   let generated = 0
 
+
   for (const post of posts) {
     const [year, month, day] = post.date.split('-')
     const dirPath = path.join(__dirname, year, month, day, post.slug)
@@ -253,6 +254,36 @@ async function buildStaticPages(posts) {
 
     // 为所有图片添加 lazy loading
     htmlContent = htmlContent.replace(/<img /g, '<img loading="lazy" ')
+
+    // 检查 markdown/HTML 中的本地图片引用，并拷贝到输出目录
+    // 1. 匹配 markdown 图片 ![alt](img.png) 和 HTML <img src="img.png">
+    // 2. 只处理相对路径（不含 http/https/ftp 开头）
+    const imgRegexMd = /!\[[^\]]*\]\(([^)]+)\)/g
+    const imgRegexHtml = /<img [^>]*src=["']([^"'>]+)["'][^>]*>/g
+    const images = new Set()
+    let match
+    // 匹配 markdown 图片
+    while ((match = imgRegexMd.exec(bodyNoTitle)) !== null) {
+      const imgPath = match[1]
+      if (!/^([a-z]+:)?\//i.test(imgPath)) images.add(imgPath)
+    }
+    // 匹配 HTML 图片
+    while ((match = imgRegexHtml.exec(htmlContent)) !== null) {
+      const imgPath = match[1]
+      if (!/^([a-z]+:)?\//i.test(imgPath)) images.add(imgPath)
+    }
+    // 拷贝图片到输出目录
+    for (const imgRelPath of images) {
+      // 图片在 md 文件同目录
+      const imgSrcPath = path.join(path.dirname(filePath), imgRelPath)
+      const imgDestPath = path.join(dirPath, imgRelPath)
+      if (fs.existsSync(imgSrcPath)) {
+        fs.mkdirSync(path.dirname(imgDestPath), { recursive: true })
+        fs.copyFileSync(imgSrcPath, imgDestPath)
+      } else {
+        console.warn(`图片未找到: ${imgSrcPath}`)
+      }
+    }
 
     // 根路径（始终 4 层深度：year/month/day/slug）
     const rootPath = '../../../../'
