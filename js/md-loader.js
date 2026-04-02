@@ -26,6 +26,7 @@ async function loadLocalPosts() {
       file: item.file,
       created_at: item.created_at,
       updated_at: item.updated_at,
+      coverImage: item.coverImage || null,
       _contentLoaded: false
     }))
 

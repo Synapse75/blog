@@ -169,9 +169,21 @@ function buildIndex() {
     // 获取 created 的日期部分 YYYY-MM-DD
     const dateStr = createdAt.slice(0, 10)
 
+    // 检查是否有 cover 图片（首行是否为图片）
+    const firstLineMatch = body.match(/^!\[([^\]]*)\]\(([^)]+)\)/)
+    let coverImage = null
+    if (firstLineMatch) {
+      const imgSrc = firstLineMatch[2]
+      // 只处理相对路径的图片
+      if (!/^([a-z]+:|\/)/i.test(imgSrc)) {
+        coverImage = imgSrc
+      }
+    }
+
     // 摘要：去掉 markdown 语法，取前 200 字符
     const excerpt = body
       .replace(/^#{1,6}\s+.+/gm, '')  // 去标题行
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '')  // 去掉所有图片
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       .replace(/[*_`~]/g, '')
       .replace(/\r?\n/g, ' ')
@@ -191,7 +203,8 @@ function buildIndex() {
       subcategory: subcategory || '',
       tags: meta.tags || [],
       file: relPath,
-      excerpt
+      excerpt,
+      coverImage
     })
   }
 
@@ -250,7 +263,22 @@ async function buildStaticPages(posts) {
 
     // 去掉标题行（页面已有 <h1>）
     const bodyNoTitle = body.replace(/^#{1,2}\s+.+\r?\n+/, '').trim()
-    let htmlContent = marked.parse(bodyNoTitle)
+    
+    // 检查第一行是否是图片（markdown 原始格式 ![alt](img.png)）
+    let coverImageHtml = ''
+    let contentForParse = bodyNoTitle
+    const firstLineMatch = bodyNoTitle.match(/^!\[([^\]]*)\]\(([^)]+)\)/)
+    if (firstLineMatch) {
+      const imgSrc = firstLineMatch[2]
+      // 只处理相对路径的图片
+      if (!/^([a-z]+:|\/)/i.test(imgSrc)) {
+        coverImageHtml = `<div class="post-detail-cover"><img src="${imgSrc}" alt="cover" loading="lazy"></div>`
+        // 从正文中移除第一行的图片语法（包括所有替换文字）
+        contentForParse = bodyNoTitle.replace(/^!\[[^\]]*\]\([^)]+\)\s*\n*/, '')
+      }
+    }
+    
+    let htmlContent = marked.parse(contentForParse)
 
     // 为所有图片添加 lazy loading
     htmlContent = htmlContent.replace(/<img /g, '<img loading="lazy" ')
@@ -332,6 +360,7 @@ async function buildStaticPages(posts) {
       <div class="post-detail-header">
         <div class="post-filename-subtitle">${escapeHtmlBuild(post.file.replace(/\.md$/i, ''))}</div>
         <h1 class="post-detail-title">${escapeHtmlBuild(post.title)}</h1>
+        ${coverImageHtml}
         <div class="post-detail-meta">
           ${categoryHtml}
           <div class="post-detail-meta-item">📅 ${post.date}</div>

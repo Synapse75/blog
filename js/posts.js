@@ -37,70 +37,171 @@ function renderPostsList(postsToRender) {
   }
   
   postsToRender.forEach(post => {
-    const card = document.createElement('div')
-    card.className = 'post-card'
-    card.style.cursor = 'pointer'
-    card.onclick = () => navigateTo(getPostHash(post))
-
-    // 鼠标悬停时预加载文章内容
-    card.onmouseenter = () => {
-      if (!post._contentLoaded) loadLocalPostContent(post)
-    }
-    
-    // 分类标签（位于标题上方，灰色小字）
-    if (post.category) {
-      const categoryLabel = document.createElement('div')
-      categoryLabel.className = 'post-card-category'
-      categoryLabel.textContent = post.category
-      categoryLabel.style.cursor = 'pointer'
-      categoryLabel.onclick = (e) => {
-        e.stopPropagation()
-        navigateTo('#/category/' + encodeURIComponent(post.category))
+    // 如果有 cover 图片，使用特殊布局
+    if (post.coverImage) {
+      const card = document.createElement('div')
+      card.className = 'post-card-with-cover'
+      card.style.cursor = 'pointer'
+      card.onclick = () => navigateTo(getPostHash(post))
+      
+      // 鼠标悬停时预加载文章内容
+      card.onmouseenter = () => {
+        if (!post._contentLoaded) loadLocalPostContent(post)
       }
-      card.appendChild(categoryLabel)
-    }
-    
-    const header = document.createElement('div')
-    header.className = 'post-card-header'
-    
-    const title = document.createElement('h3')
-    title.className = 'post-card-title'
-    title.textContent = post.title || '（无标题）'
-    
-    const time = document.createElement('span')
-    time.className = 'post-card-time'
-    time.textContent = formatDate(post.updated_at)
-    
-    header.appendChild(title)
-    header.appendChild(time)
-    card.appendChild(header)
-    
-    const content = document.createElement('p')
-    content.className = 'post-card-content'
-    content.textContent = post.excerpt || ''
-    card.appendChild(content)
-    
-    // 标签（不包含分类）
-    if (post.tags && post.tags.length > 0) {
-      const metaRow = document.createElement('div')
-      metaRow.className = 'post-card-tags'
       
-      post.tags.forEach(tag => {
-        const tagEl = document.createElement('span')
-        tagEl.className = 'post-card-tag'
-        tagEl.textContent = tag.name
-        tagEl.style.cursor = 'pointer'
-        tagEl.onclick = (e) => {
+      // 从 post.file 获取目录前缀
+      const fileDir = post.file.substring(0, post.file.lastIndexOf('/') + 1)
+      const postsFilePrefix = 'posts/' + fileDir
+      const coverSrc = postsFilePrefix + post.coverImage
+      
+      // Cover 区域（上，占 61.8% 高度）
+      const coverArea = document.createElement('div')
+      coverArea.style.flex = '0 0 61.8%'
+      coverArea.style.overflow = 'hidden'
+      coverArea.style.backgroundColor = '#f5f5f5'
+      const img = document.createElement('img')
+      img.src = coverSrc
+      img.alt = 'cover'
+      img.loading = 'lazy'
+      img.style.width = '100%'
+      img.style.height = '100%'
+      img.style.objectFit = 'cover'
+      coverArea.appendChild(img)
+      card.appendChild(coverArea)
+      
+      // 信息区域（下，占 38.2% 高度）
+      const infoArea = document.createElement('div')
+      infoArea.style.flex = '0 0 38.2%'
+      infoArea.style.display = 'flex'
+      infoArea.style.flexDirection = 'column'
+      infoArea.style.padding = '12px 16px'
+      infoArea.style.overflow = 'hidden'
+      infoArea.style.justifyContent = 'flex-start'
+      
+      // 分类
+      if (post.category) {
+        const categoryLabel = document.createElement('div')
+        categoryLabel.className = 'post-card-category'
+        categoryLabel.textContent = post.category
+        categoryLabel.style.fontSize = '12px'
+        categoryLabel.style.marginBottom = '4px'
+        infoArea.appendChild(categoryLabel)
+      }
+      
+      // 标题和时间
+      const header = document.createElement('div')
+      header.style.display = 'flex'
+      header.style.justifyContent = 'space-between'
+      header.style.alignItems = 'flex-start'
+      header.style.marginBottom = '6px'
+      header.style.flex = '1'
+      
+      const title = document.createElement('h3')
+      title.className = 'post-card-title'
+      title.textContent = post.title || '（无标题）'
+      title.style.fontSize = '16px'
+      title.style.fontWeight = 'bold'
+      title.style.margin = '0'
+      title.style.display = '-webkit-box'
+      title.style.WebkitLineClamp = '2'
+      title.style.WebkitBoxOrient = 'vertical'
+      title.style.overflow = 'hidden'
+      
+      const time = document.createElement('span')
+      time.className = 'post-card-time'
+      time.textContent = formatDate(post.updated_at)
+      time.style.fontSize = '12px'
+      time.style.color = '#999'
+      time.style.flexShrink = '0'
+      time.style.marginLeft = '8px'
+      
+      header.appendChild(title)
+      header.appendChild(time)
+      infoArea.appendChild(header)
+      
+      // 摘要
+      const content = document.createElement('p')
+      content.className = 'post-card-content'
+      content.textContent = post.excerpt || ''
+      content.style.fontSize = '12px'
+      content.style.color = '#666'
+      content.style.margin = '0'
+      content.style.lineHeight = '1.4'
+      content.style.display = '-webkit-box'
+      content.style.WebkitLineClamp = '1'
+      content.style.WebkitBoxOrient = 'vertical'
+      content.style.overflow = 'hidden'
+      infoArea.appendChild(content)
+      
+      card.appendChild(infoArea)
+      postsList.appendChild(card)
+    } else {
+      // 原来的卡片布局（无 cover）
+      const card = document.createElement('div')
+      card.className = 'post-card'
+      card.style.cursor = 'pointer'
+      card.onclick = () => navigateTo(getPostHash(post))
+
+      // 鼠标悬停时预加载文章内容
+      card.onmouseenter = () => {
+        if (!post._contentLoaded) loadLocalPostContent(post)
+      }
+      
+      // 分类标签（位于标题上方，灰色小字）
+      if (post.category) {
+        const categoryLabel = document.createElement('div')
+        categoryLabel.className = 'post-card-category'
+        categoryLabel.textContent = post.category
+        categoryLabel.style.cursor = 'pointer'
+        categoryLabel.onclick = (e) => {
           e.stopPropagation()
-          navigateTo('#/tag/' + encodeURIComponent(tag.name))
+          navigateTo('#/category/' + encodeURIComponent(post.category))
         }
-        metaRow.appendChild(tagEl)
-      })
+        card.appendChild(categoryLabel)
+      }
       
-      card.appendChild(metaRow)
+      const header = document.createElement('div')
+      header.className = 'post-card-header'
+      
+      const title = document.createElement('h3')
+      title.className = 'post-card-title'
+      title.textContent = post.title || '（无标题）'
+      
+      const time = document.createElement('span')
+      time.className = 'post-card-time'
+      time.textContent = formatDate(post.updated_at)
+      
+      header.appendChild(title)
+      header.appendChild(time)
+      card.appendChild(header)
+      
+      const content = document.createElement('p')
+      content.className = 'post-card-content'
+      content.textContent = post.excerpt || ''
+      card.appendChild(content)
+      
+      // 标签（不包含分类）
+      if (post.tags && post.tags.length > 0) {
+        const metaRow = document.createElement('div')
+        metaRow.className = 'post-card-tags'
+        
+        post.tags.forEach(tag => {
+          const tagEl = document.createElement('span')
+          tagEl.className = 'post-card-tag'
+          tagEl.textContent = tag.name
+          tagEl.style.cursor = 'pointer'
+          tagEl.onclick = (e) => {
+            e.stopPropagation()
+            navigateTo('#/tag/' + encodeURIComponent(tag.name))
+          }
+          metaRow.appendChild(tagEl)
+        })
+        
+        card.appendChild(metaRow)
+      }
+      
+      postsList.appendChild(card)
     }
-    
-    postsList.appendChild(card)
   })
 }
 
@@ -169,13 +270,33 @@ function showPostDetail(post) {
   
   // Markdown 渲染
   let contentHtml = ''
+  let content = post.content || ''
+  
+  // 如果有 cover 图片，先从原始 markdown 中移除第一行的图片语法
+  if (post.coverImage) {
+    content = content.replace(/^!\[[^\]]*\]\([^)]+\)\s*\n*/, '')
+  }
+  
   if (typeof marked !== 'undefined') {
-    contentHtml = marked.parse(post.content || '')
+    contentHtml = marked.parse(content)
   } else {
-    contentHtml = escapeHtml(post.content || '').replace(/\n/g, '<br>')
+    contentHtml = escapeHtml(content).replace(/\n/g, '<br>')
   }
   // 为所有图片添加懒加载
   contentHtml = contentHtml.replace(/<img /g, '<img loading="lazy" ')
+  
+  // 如果有 cover 图片，单独显示 cover 图片
+  let coverImageHtml = ''
+  if (post.coverImage) {
+    const fileDir = post.file.substring(0, post.file.lastIndexOf('/') + 1)
+    const postsFilePrefix = 'posts/' + fileDir
+    const coverSrc = postsFilePrefix + post.coverImage
+    coverImageHtml = `
+      <div class="post-detail-cover">
+        <img src="${coverSrc}" alt="cover" loading="lazy" />
+      </div>
+    `
+  }
   
   detailPage.innerHTML = `
     <button class="back-to-list-btn" onclick="backToPostsList()">← 返回列表</button>
@@ -186,6 +307,7 @@ function showPostDetail(post) {
       </div>
       ${tagsHtml}
     </div>
+    ${coverImageHtml}
     <div class="post-detail-content markdown-body">${contentHtml}</div>
     <div class="interactions-section" data-post-id="${post.id}"></div>
   `
